@@ -214,16 +214,38 @@ module PagerDuty
         if from_email_address
           options[:headers] ||= {}
           options[:headers][:from] = from_email_address
-        end 
+        end
 
         response = post "/incidents/#{incident_id}/notes", options
         response[:note]
       end    
 
-      # # Create an incident synchronously without a corresponding event from a monitoring service.
-      # # /incidents
-      # def post_incidents()
-      # end
+      # Create an incident synchronously without a corresponding event from a monitoring service.
+      # /incidents
+      def create_incident(from_email_address, title, body, service_id, escalation_policy_id, options = {})
+        if from_email_address
+          options[:headers] ||= {}
+          options[:headers][:from] = from_email_address
+        end
+        options[:incident] = {
+          'type': 'incident',
+          'title': title        
+        }
+        options[:body] = {
+          'type': 'incident_body',
+          'details': body
+        }
+        options[:service] ={
+          'type': 'service_reference',
+          'id': service_id
+        }
+        options[:escalation_policy] = {
+          'id': escalation_policy_id,
+          'type': 'escalation_policy_reference'
+        }
+        response = post "/incidents", options
+        response
+      end
 
       # # Resolve multiple alerts or associate them with different incidents.
       # # /incidents/{id}/alerts
